@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 // import { Link } from "react-router-dom";
-import { Post } from "./types";
+import { Post } from "../_types/Post";
 
 // propsの型宣言
 type PostListProps = {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import PostList from "./_components/PostList";
-import { Post } from "./_components/types";
+import { Post } from "./_types/Post";
 
 export default function TopPage() {
   const [posts, setPosts] = useState<Post[]>([]); //Post[]としてPostの配列型を明示

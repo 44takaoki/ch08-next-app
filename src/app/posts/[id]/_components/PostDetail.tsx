@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Post } from "../../_components/types";
+import { Post } from "../../../_types/Post";
 
 type PostDetailProps = {
   post: Post;

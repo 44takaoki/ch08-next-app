@@ -1,9 +1,9 @@
 "use client";
 
 // import { useParams } from "react-router-dom";
-import PostDetail from "../_components/PostDetail";
+import PostDetail from "./_components/PostDetail";
 import { useEffect, useState } from "react";
-import { Post } from "../../_components/types";
+import { Post } from "../../_types/Post";
 
 export default function PostDetailPage({ params }: { params: { id: string } }) {
   // ルートパラメータを取得

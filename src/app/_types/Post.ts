@@ -6,7 +6,3 @@ export type Post = {
   categories: string[];
   content: string;
 };
-
-// export type PostListProps = {
-//   posts: Post[];
-// };
