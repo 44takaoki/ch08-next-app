@@ -20,7 +20,8 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="max-w-4xl grid grid-cols-1 gap-2 mx-auto mt-6 ">
       {/* postに型付けしなくても、推論されるので不要 */}
-      {posts?.map((post) => (
+      {/* postsは初期値が空配列でundefinedやnullにならないため、?不要 */}
+      {posts.map((post) => (
         <li key={post.id} className="h-auto m-5 p-3 border border-slate-400 ">
           <Link href={`/posts/${post.id}`} className="header-link">
             <div className="flex justify-between mx-auto  ">
