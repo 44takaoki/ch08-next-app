@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 // import { Link } from "react-router-dom";
-import { Post } from "../_types/Post";
+
+import { MicroCmsPost } from "../_types/MicroCmsPost";
 
 // propsの型宣言
 type PostListProps = {
-  posts: Post[];
+  posts: MicroCmsPost[];
 };
 
 export default function PostList({ posts }: PostListProps) {
-  const formatDate = (date: Post) => {
+  const formatDate = (date: MicroCmsPost) => {
     // 日時をyyyy/MM/DD形式にフォーマット
     const yeardate = new Date(date.createdAt).toLocaleString().split(" ", 1);
     return yeardate;
@@ -19,7 +20,7 @@ export default function PostList({ posts }: PostListProps) {
   return (
     <ul className="max-w-4xl grid grid-cols-1 gap-2 mx-auto mt-6 ">
       {/* postに型付けしなくても、推論されるので不要 */}
-      {posts.map((post) => (
+      {posts?.map((post) => (
         <li key={post.id} className="h-auto m-5 p-3 border border-slate-400 ">
           <Link href={`/posts/${post.id}`} className="header-link">
             <div className="flex justify-between mx-auto  ">
@@ -30,7 +31,7 @@ export default function PostList({ posts }: PostListProps) {
                     key={index}
                     className="p-1 text-blue-500 border border-blue-300 rounded-md "
                   >
-                    {category}
+                    {category.name}
                   </p>
                 ))}
               </div>
