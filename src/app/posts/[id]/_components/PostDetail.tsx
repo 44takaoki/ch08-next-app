@@ -1,14 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Post } from "../../../_types/Post";
+import { MicroCmsPost } from "@/app/_types/MicroCmsPost";
 
 type PostDetailProps = {
-  post: Post;
+  post: MicroCmsPost;
 };
 
 export default function PostDetail({ post }: PostDetailProps) {
-  const formatDate = (date: Post) => {
+  const formatDate = (date: MicroCmsPost) => {
     // 日時をyyyy/MM/DD形式にフォーマット
     const yeardate = new Date(date.createdAt).toLocaleString().split(" ", 1);
     return yeardate;
@@ -25,7 +25,7 @@ export default function PostDetail({ post }: PostDetailProps) {
           <Image
             height={400}
             width={800}
-            src={post.thumbnailUrl}
+            src={post.thumbnail.url}
             alt={post.id}
           />
         </div>
@@ -37,7 +37,7 @@ export default function PostDetail({ post }: PostDetailProps) {
                 key={index}
                 className="p-1 text-blue-500 border border-blue-300 rounded-md "
               >
-                {category}
+                {category.name}
               </p>
             ))}
           </div>
