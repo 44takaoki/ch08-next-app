@@ -37,10 +37,15 @@ export default function RootLayout({
             <Link href="/" className="header-link">
               <h1 className="text-2xl text-white font-semibold">Blog</h1>
             </Link>
+            <div className="flex ">
+              <Link href="/admin/posts" className="header-link">
+                <p className="text-base text-white mx-5">管理画面</p>
+              </Link>
 
-            <Link href="/contact" className="header-link">
-              <p className="text-base text-white">お問い合わせ</p>
-            </Link>
+              <Link href="/contact" className="header-link">
+                <p className="text-base text-white  ">お問い合わせ</p>
+              </Link>
+            </div>
           </div>
         </header>
         {children}

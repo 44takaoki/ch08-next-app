@@ -1,8 +1,10 @@
-export type Post = {
-  id: string;
+import { Category } from "./Category";
+
+export interface Post {
+  id: number;
   title: string;
-  thumbnailUrl: string;
-  createdAt: string;
-  categories: string[];
   content: string;
-};
+  createdAt: string;
+  postCategories: { category: Category }[];
+  thumbnailUrl: string;
+}
