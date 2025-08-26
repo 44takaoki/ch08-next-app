@@ -1,3 +1,4 @@
+import { CreatePostRequestBody } from "@/app/_types/Post";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -30,14 +31,6 @@ export const GET = async (request: NextRequest) => {
       return NextResponse.json({ status: error.message }, { status: 400 });
   }
 };
-
-// 記事作成のリクエストボディの型
-interface CreatePostRequestBody {
-  title: string;
-  content: string;
-  categories: { id: number }[];
-  thumbnailUrl: string;
-}
 
 // POSTという命名にすることで、POSTリクエストの時にこの関数が呼ばれる
 export const POST = async (request: NextRequest, context: any) => {

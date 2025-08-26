@@ -19,33 +19,47 @@ export default function page({ params }: { params: { id: string } }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const { id } = useParams();
   const router = useRouter();
+  const [isSubmit, setSubmit] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトの動作をキャンセル
     e.preventDefault();
 
+    setSubmit(true);
     // 記事を作成
-    await fetch(`/api/admin/posts/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-type": "applicaiton/json",
-      },
-      body: JSON.stringify({ title, content, thumbnailUrl, categories }),
-    });
+    try {
+      await fetch(`/api/admin/posts/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "applicaiton/json",
+        },
+        body: JSON.stringify({ title, content, thumbnailUrl, categories }),
+      });
 
-    alert("記事を更新しました。");
+      alert("記事を更新しました。");
+      setSubmit(false);
+    } catch (err) {
+      alert("送信に失敗しました。");
+    }
   };
 
   const handleDeletePost = async () => {
     if (!confirm("記事を削除しますか？")) return;
 
-    await fetch(`/api/admin/posts/${id}`, {
-      method: "DELETE",
-    });
+    setSubmit(true);
+    try {
+      await fetch(`/api/admin/posts/${id}`, {
+        method: "DELETE",
+      });
 
-    alert("記事を削除しました。");
+      alert("記事を削除しました。");
 
-    router.push("/admin/posts");
+      router.push("/admin/posts");
+
+      setSubmit(false);
+    } catch (err) {
+      alert("削除に失敗しました。");
+    }
   };
 
   // APIでpostを取得する処理をuseEffectで実行
@@ -85,6 +99,7 @@ export default function page({ params }: { params: { id: string } }) {
         setCategories={setCategories}
         onSubmit={handleSubmit}
         onDelete={handleDeletePost}
+        isSubmit={isSubmit}
       />
     </div>
   );

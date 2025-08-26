@@ -1,3 +1,4 @@
+import { CreateCategoryRequestBody } from "@/app/_types/Category";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,11 +20,6 @@ export const GET = async (request: NextRequest) => {
       return NextResponse.json({ status: error.message }, { status: 400 });
   }
 };
-
-// カテゴリー作成のリクエストボディの型
-interface CreateCategoryRequestBody {
-  name: string;
-}
 
 export const POST = async (request: NextRequest, context: any) => {
   try {

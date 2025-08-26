@@ -1,3 +1,4 @@
+import { UpdateCategoryRequestBody } from "@/app/_types/Category";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -27,11 +28,6 @@ export const GET = async (
       return NextResponse.json({ status: error.message }, { status: 400 });
   }
 };
-
-// カテゴリーの更新時に送られてくるリクエストのbodyの型
-interface UpdateCategoryRequestBody {
-  name: string;
-}
 
 export const PUT = async (
   request: NextRequest,

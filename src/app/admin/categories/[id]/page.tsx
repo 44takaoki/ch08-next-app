@@ -9,33 +9,49 @@ export default function page() {
   const [name, setName] = useState("");
   const { id } = useParams();
   const router = useRouter();
+  const [isSubmit, setSubmit] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトのキャンセル
     e.preventDefault();
 
-    // カテゴリーの作成
-    await fetch(`/api/admin/categories/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name }),
-    });
+    setSubmit(true);
+    try {
+      // 強制的に失敗させる
+      // throw new Error("テスト用エラー");
+      // カテゴリーの作成
+      await fetch(`/api/admin/categories/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      });
 
-    alert("カテゴリーを更新しました。");
+      alert("カテゴリーを更新しました。");
+
+      setSubmit(false);
+    } catch (err) {
+      alert("送信に失敗しました。");
+    }
   };
 
   const handleDeletePost = async () => {
     if (!confirm("カテゴリーを削除しますか？")) return;
 
-    await fetch(`/api/admin/categories/${id}`, {
-      method: "DELETE",
-    });
+    setSubmit(true);
+    try {
+      await fetch(`/api/admin/categories/${id}`, {
+        method: "DELETE",
+      });
 
-    alert("カテゴリーを削除しました。");
+      alert("カテゴリーを削除しました。");
+      router.push("/admin/categories");
 
-    router.push("/admin/categories");
+      setSubmit(false);
+    } catch (err) {
+      alert("カテゴリー削除に失敗しました。");
+    }
   };
 
   useEffect(() => {
@@ -60,6 +76,7 @@ export default function page() {
         setName={setName}
         onSubmit={handleSubmit}
         onDelete={handleDeletePost}
+        isSubmit={isSubmit}
       />
     </div>
   );

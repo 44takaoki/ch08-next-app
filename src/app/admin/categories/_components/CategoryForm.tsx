@@ -6,6 +6,7 @@ interface Props {
   setName: (title: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onDelete?: () => void;
+  isSubmit: boolean;
 }
 
 export const CategoryForm = ({
@@ -14,6 +15,7 @@ export const CategoryForm = ({
   setName,
   onSubmit,
   onDelete,
+  isSubmit,
 }: Props) => {
   return (
     <form className="max-w-3xl mx-10">
@@ -27,12 +29,14 @@ export const CategoryForm = ({
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="my-2 w-full border border-gray-300 rounded p-3"
+          disabled={isSubmit}
         />
       </div>
       <div className="my-3">
         <button
           className="bg-emerald-600 px-3 py-2 text-white rounded"
           onClick={onSubmit}
+          disabled={isSubmit}
         >
           {mode === "new" ? "作成" : "更新"}
         </button>
@@ -40,6 +44,7 @@ export const CategoryForm = ({
           <button
             className="bg-rose-600 mx-3 px-3 py-2 text-white rounded"
             onClick={onDelete}
+            disabled={isSubmit}
           >
             削除
           </button>

@@ -1,3 +1,4 @@
+import { UpdatePostRequestBody } from "@/app/_types/Post";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -27,21 +28,13 @@ export const GET = async (
         },
       },
     });
-    console.log(post);
+    // console.log(post);
     return NextResponse.json({ status: "OK", post: post }, { status: 200 });
   } catch (error) {
     if (error instanceof Error)
       return NextResponse.json({ status: error.message }, { status: 400 });
   }
 };
-
-// 記事の更新に送られてくるリクエストのbodyの型
-interface UpdatePostRequestBody {
-  title: string;
-  content: string;
-  categories: { id: number }[];
-  thumbnailUrl: string;
-}
 
 // PUTという命名にすることで、PUTリクエストの時にこの関数が呼ばれる
 export const PUT = async (

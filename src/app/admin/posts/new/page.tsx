@@ -19,27 +19,34 @@ export default function page({ params }: { params: { id: string } }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const { id } = useParams();
   const router = useRouter();
+  const [isSubmit, setSubmit] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトの動作をキャンセル
     e.preventDefault();
 
+    setSubmit(true);
     // 記事を作成
-    const res = await fetch(`/api/admin/posts`, {
-      method: "POST",
-      headers: {
-        "Content-type": "applicaiton/json",
-      },
-      body: JSON.stringify({ title, content, thumbnailUrl, categories }),
-    });
+    try {
+      const res = await fetch(`/api/admin/posts`, {
+        method: "POST",
+        headers: {
+          "Content-type": "applicaiton/json",
+        },
+        body: JSON.stringify({ title, content, thumbnailUrl, categories }),
+      });
 
-    //  レスポンスから作成した記事のIDを取得
-    const { id } = await res.json();
+      //  レスポンスから作成した記事のIDを取得
+      const { id } = await res.json();
 
-    //作成した記事の詳細ページに遷移
-    router.push(`/admin/posts/${id}`);
+      //作成した記事の詳細ページに遷移
+      router.push(`/admin/posts/${id}`);
 
-    alert("記事を作成しました。");
+      alert("記事を作成しました。");
+      setSubmit(false);
+    } catch (err) {
+      alert("送信に失敗しました。");
+    }
   };
 
   return (
@@ -58,6 +65,7 @@ export default function page({ params }: { params: { id: string } }) {
         categories={categories}
         setCategories={setCategories}
         onSubmit={handleSubmit}
+        isSubmit={isSubmit}
       />
     </div>
   );
