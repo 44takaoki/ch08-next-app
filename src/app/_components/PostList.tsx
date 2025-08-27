@@ -1,17 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { Post } from "../_types/Post";
 // import { Link } from "react-router-dom";
-
-import { MicroCmsPost } from "../_types/MicroCmsPost";
 
 // propsの型宣言
 type PostListProps = {
-  posts: MicroCmsPost[];
+  posts: Post[];
 };
 
 export default function PostList({ posts }: PostListProps) {
-  const formatDate = (date: MicroCmsPost) => {
+  const formatDate = (date: Post) => {
     // 日時をyyyy/MM/DD形式にフォーマット
     const yeardate = new Date(date.createdAt).toLocaleString().split(" ", 1);
     return yeardate;
@@ -27,12 +26,12 @@ export default function PostList({ posts }: PostListProps) {
             <div className="flex justify-between mx-auto  ">
               <p className="text-gray-400 m-2">{formatDate(post)}</p>
               <div className="flex space-x-2 ">
-                {post.categories.map((category, index) => (
+                {post.postCategories.map((pc) => (
                   <p
-                    key={index}
+                    key={pc.category.id}
                     className="p-1 text-blue-500 border border-blue-300 rounded-md "
                   >
-                    {category.name}
+                    {pc.category.name}
                   </p>
                 ))}
               </div>

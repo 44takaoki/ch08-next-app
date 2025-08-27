@@ -3,24 +3,21 @@
 import { useEffect, useState } from "react";
 import PostList from "./_components/PostList";
 
-import { MicroCmsPost } from "./_types/MicroCmsPost";
+import { Post } from "./_types/Post";
 
 export default function TopPage() {
-  const [posts, setPosts] = useState<MicroCmsPost[]>([]); //Post[]としてPostの配列型を明示
+  const [posts, setPosts] = useState<Post[]>([]); //Post[]としてPostの配列型を明示
   const [isLoading, setLoading] = useState(true);
 
   // APIでpostsを取得する処理をuseEffectで実行します。
   useEffect(() => {
     const fetcher = async () => {
-      const res = await fetch("https://muinnr02nv.microcms.io/api/v1/posts", {
-        headers: {
-          "X-MICROCMS-API-KEY": process.env
-            .NEXT_PUBLIC_MICROCMS_API_KEY as string,
-        },
+      const res = await fetch("/api/posts", {
+        headers: {},
       });
-      const { contents } = await res.json();
+      const { posts } = await res.json();
 
-      setPosts(contents);
+      setPosts(posts);
       setLoading(false);
     };
 
