@@ -32,10 +32,10 @@ export default function page() {
       router.push(`/admin/categories/${id}`);
 
       alert("カテゴリーを作成しました。");
-
-      setSubmit(false);
     } catch (err) {
       alert("送信に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 

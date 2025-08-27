@@ -16,6 +16,7 @@ export default function page() {
     e.preventDefault();
 
     setSubmit(true);
+
     try {
       // 強制的に失敗させる
       // throw new Error("テスト用エラー");
@@ -29,10 +30,10 @@ export default function page() {
       });
 
       alert("カテゴリーを更新しました。");
-
-      setSubmit(false);
     } catch (err) {
       alert("送信に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 
@@ -47,10 +48,10 @@ export default function page() {
 
       alert("カテゴリーを削除しました。");
       router.push("/admin/categories");
-
-      setSubmit(false);
     } catch (err) {
       alert("カテゴリー削除に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 

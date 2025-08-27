@@ -37,9 +37,10 @@ export default function page({ params }: { params: { id: string } }) {
       });
 
       alert("記事を更新しました。");
-      setSubmit(false);
     } catch (err) {
       alert("送信に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 
@@ -55,10 +56,10 @@ export default function page({ params }: { params: { id: string } }) {
       alert("記事を削除しました。");
 
       router.push("/admin/posts");
-
-      setSubmit(false);
     } catch (err) {
       alert("削除に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 

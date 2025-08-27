@@ -11,8 +11,6 @@ export default function page({ params }: { params: { id: string } }) {
   // ルートパラメータを取得
   // const { id } = useParams();
 
-  const [isLoading, setLoading] = useState(true);
-
   const [title, setTitle] = useState(" ");
   const [content, setContent] = useState(" ");
   const [thumbnailUrl, setThumbnailUrl] = useState(" ");
@@ -43,9 +41,10 @@ export default function page({ params }: { params: { id: string } }) {
       router.push(`/admin/posts/${id}`);
 
       alert("記事を作成しました。");
-      setSubmit(false);
     } catch (err) {
       alert("送信に失敗しました。");
+    } finally {
+      setSubmit(false);
     }
   };
 
