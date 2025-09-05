@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import { CategoryForm } from "../_components/CategoryForm";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 
 export default function page() {
   const [name, setName] = useState("");
   const router = useRouter();
   const [isSubmit, setSubmit] = useState(false);
+  const { token } = useSupabaseSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトのキャンセル
@@ -21,6 +23,7 @@ export default function page() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: token!, //Headerにtokenを付与
         },
         body: JSON.stringify({ name }),
       });

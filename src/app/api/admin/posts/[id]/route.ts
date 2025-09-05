@@ -1,4 +1,5 @@
 import { UpdatePostRequestBody } from "@/app/_types/Post";
+import { supabase } from "@/utils/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,7 +10,13 @@ export const GET = async (
   { params }: { params: { id: string } }
 ) => {
   const { id } = params;
-
+  const token = request.headers.get("Authorization") ?? "";
+  //supabaseに対してtokenを送る
+  const { error } = await supabase.auth.getUser(token);
+  // 送ったtokenが正しくない場合、errorが返却されるので、クライアントにもエラーを返す
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 });
+  // tokenが正しい場合、以降が実行される
   try {
     const post = await prisma.post.findUnique({
       where: {
@@ -28,6 +35,7 @@ export const GET = async (
         },
       },
     });
+
     // console.log(post);
     return NextResponse.json({ status: "OK", post: post }, { status: 200 });
   } catch (error) {
@@ -45,8 +53,12 @@ export const PUT = async (
   const { id } = params;
 
   //リクエストのbodyを取得
-  const { title, content, categories, thumbnailUrl }: UpdatePostRequestBody =
-    await request.json();
+  const {
+    title,
+    content,
+    categories,
+    thumbnailImageKey,
+  }: UpdatePostRequestBody = await request.json();
 
   try {
     // idを指定して、Postを更新
@@ -57,7 +69,7 @@ export const PUT = async (
       data: {
         title,
         content,
-        thumbnailUrl,
+        thumbnailImageKey,
       },
     });
 

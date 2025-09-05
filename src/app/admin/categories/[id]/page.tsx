@@ -4,12 +4,14 @@ import React, { useEffect, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import { CategoryForm } from "../_components/CategoryForm";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 
 export default function page() {
   const [name, setName] = useState("");
   const { id } = useParams();
   const router = useRouter();
   const [isSubmit, setSubmit] = useState(false);
+  const { token } = useSupabaseSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトのキャンセル
@@ -25,6 +27,7 @@ export default function page() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: token!, //Headerにtokenを付与
         },
         body: JSON.stringify({ name }),
       });
@@ -56,15 +59,22 @@ export default function page() {
   };
 
   useEffect(() => {
+    if (!token) return;
+
     const fetcher = async () => {
-      const res = await fetch(`/api/admin/categories/${id}`);
+      const res = await fetch(`/api/admin/categories/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token, //Headerにtokenを付与
+        },
+      });
       const { category } = await res.json();
       setName(category.name);
     };
 
     fetcher();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, token]);
 
   return (
     <div className="max-w-3xl mx-10">

@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import React, { useEffect, useState } from "react";
 import { PostForm } from "../_components/PostForm";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 
 export default function page({ params }: { params: { id: string } }) {
   // ルートパラメータを取得
@@ -13,11 +14,12 @@ export default function page({ params }: { params: { id: string } }) {
 
   const [title, setTitle] = useState(" ");
   const [content, setContent] = useState(" ");
-  const [thumbnailUrl, setThumbnailUrl] = useState(" ");
+  const [thumbnailImageKey, setThumbnailImageKey] = useState(" ");
   const [categories, setCategories] = useState<Category[]>([]);
   const { id } = useParams();
   const router = useRouter();
   const [isSubmit, setSubmit] = useState(false);
+  const { token } = useSupabaseSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトの動作をキャンセル
@@ -29,9 +31,10 @@ export default function page({ params }: { params: { id: string } }) {
       const res = await fetch(`/api/admin/posts`, {
         method: "POST",
         headers: {
-          "Content-type": "applicaiton/json",
+          "Content-Type": "application/json",
+          Authorization: token!, //Headerにtokenを付与
         },
-        body: JSON.stringify({ title, content, thumbnailUrl, categories }),
+        body: JSON.stringify({ title, content, thumbnailImageKey, categories }),
       });
 
       //  レスポンスから作成した記事のIDを取得
@@ -59,8 +62,8 @@ export default function page({ params }: { params: { id: string } }) {
         setTitle={setTitle}
         content={content}
         setContent={setContent}
-        thumbnailUrl={thumbnailUrl}
-        setThumbnailUrl={setThumbnailUrl}
+        thumbnailImageKey={thumbnailImageKey}
+        setThumbnailImageKey={setThumbnailImageKey}
         categories={categories}
         setCategories={setCategories}
         onSubmit={handleSubmit}

@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import React, { useEffect, useState } from "react";
 import { PostForm } from "../_components/PostForm";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 
 export default function page({ params }: { params: { id: string } }) {
   // ルートパラメータを取得
@@ -15,11 +16,12 @@ export default function page({ params }: { params: { id: string } }) {
 
   const [title, setTitle] = useState(" ");
   const [content, setContent] = useState(" ");
-  const [thumbnailUrl, setThumbnailUrl] = useState(" ");
+  const [thumbnailImageKey, setThumbnailImageKey] = useState(" ");
   const [categories, setCategories] = useState<Category[]>([]);
   const { id } = useParams();
   const router = useRouter();
   const [isSubmit, setSubmit] = useState(false);
+  const { token } = useSupabaseSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトの動作をキャンセル
@@ -31,9 +33,10 @@ export default function page({ params }: { params: { id: string } }) {
       await fetch(`/api/admin/posts/${id}`, {
         method: "PUT",
         headers: {
-          "Content-type": "applicaiton/json",
+          "Content-Type": "application/json",
+          Authorization: token!, //Headerにtokenを付与
         },
-        body: JSON.stringify({ title, content, thumbnailUrl, categories }),
+        body: JSON.stringify({ title, content, thumbnailImageKey, categories }),
       });
 
       alert("記事を更新しました。");
@@ -65,20 +68,27 @@ export default function page({ params }: { params: { id: string } }) {
 
   // APIでpostを取得する処理をuseEffectで実行
   useEffect(() => {
+    if (!token) return;
+
     const fetcher = async () => {
-      const res = await fetch(`/api/admin/posts/${id}`);
+      const res = await fetch(`/api/admin/posts/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token, //Headerにtokenを付与
+        },
+      });
       const { post }: { post: Post } = await res.json();
       setLoading(false);
 
       setTitle(post.title);
       setContent(post.content);
-      setThumbnailUrl(post.thumbnailUrl);
+      setThumbnailImageKey(post.thumbnailImageKey);
       setCategories(post.postCategories.map((pc) => pc.category));
     };
 
     fetcher();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, token]);
 
   if (isLoading) return <p className="text-left">読み込み中...</p>;
   // if (!post) return <p className="text-left">記事が見つかりませんでした</p>;
@@ -94,8 +104,8 @@ export default function page({ params }: { params: { id: string } }) {
         setTitle={setTitle}
         content={content}
         setContent={setContent}
-        thumbnailUrl={thumbnailUrl}
-        setThumbnailUrl={setThumbnailUrl}
+        thumbnailImageKey={thumbnailImageKey}
+        setThumbnailImageKey={setThumbnailImageKey}
         categories={categories}
         setCategories={setCategories}
         onSubmit={handleSubmit}

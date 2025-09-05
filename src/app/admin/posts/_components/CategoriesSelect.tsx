@@ -1,3 +1,4 @@
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import { Category } from "@/app/_types/Category";
 import {
   Listbox,
@@ -18,35 +19,24 @@ export const CategoriesSelect = ({
   setSelectedCategories,
 }: Props) => {
   const [categories, setCategories] = useState<Category[]>([]);
-
-  // const handleChange = (value: number[]) => {
-  //   value.forEach((v: number) => {
-  //     const isSelect = selectedCategories.some((c) => c.id === v);
-  //     if (isSelect) {
-  //       setSelectedCategories(selectedCategories.filter((c) => c.id !== v));
-  //       return;
-  //     }
-
-  //     const category = categories.find((c) => c.id === v);
-
-  //     if (!category) return;
-  //     setSelectedCategories([...selectedCategories, category]);
-  //   });
-  // };
-
-  // const removeCategory = (id: number) => {
-  //   setSelectedCategories(selectedCategories.filter((c) => c.id !== id));
-  // };
+  const { token } = useSupabaseSession();
 
   useEffect(() => {
+    if (!token) return;
+
     const fetcher = async () => {
-      const res = await fetch("/api/admin/categories");
+      const res = await fetch("/api/admin/categories", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token, //Headerにtokenを付与
+        },
+      });
       const { categories } = await res.json();
       setCategories(categories);
     };
 
     fetcher();
-  }, []);
+  }, [token]);
 
   return (
     <div>

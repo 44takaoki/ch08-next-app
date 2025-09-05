@@ -4,6 +4,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import Link from "next/link";
+import { Header } from "./_components/Header";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,23 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* header 追加 */}
-        <header className=" bg-slate-600 p-4 ">
-          <div className="flex justify-between mx-auto container items-center">
-            <Link href="/" className="header-link">
-              <h1 className="text-2xl text-white font-semibold">Blog</h1>
-            </Link>
-            <div className="flex ">
-              <Link href="/admin/posts" className="header-link">
-                <p className="text-base text-white mx-5">管理画面</p>
-              </Link>
-
-              <Link href="/contact" className="header-link">
-                <p className="text-base text-white  ">お問い合わせ</p>
-              </Link>
-            </div>
-          </div>
-        </header>
+        <Header />
         {children}
       </body>
     </html>

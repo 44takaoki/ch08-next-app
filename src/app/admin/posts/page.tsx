@@ -1,22 +1,31 @@
 "use client";
 
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import { Post } from "@/app/_types/Post";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function page() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const { token } = useSupabaseSession();
 
   useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/posts");
-      const { posts } = await res.json();
+    if (!token) return;
 
-      setPosts(posts);
+    const fetcher = async () => {
+      // console.log("トークン", token);
+      const res = await fetch("/api/admin/posts", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token, //Headerにtokenを付与
+        },
+      });
+      const { posts } = await res.json();
+      setPosts([...posts]);
     };
 
     fetcher();
-  }, []);
+  }, [token]);
 
   const formatDate = (date: Post) => {
     // 日時をyyyy/MM/DD形式にフォーマット
