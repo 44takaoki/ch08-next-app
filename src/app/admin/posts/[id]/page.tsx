@@ -7,12 +7,13 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { PostForm } from "../_components/PostForm";
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
+import useSWR from "swr";
 
 export default function page({ params }: { params: { id: string } }) {
   // ルートパラメータを取得
   // const { id } = useParams();
 
-  const [isLoading, setLoading] = useState(true);
+  // const [isLoading, setLoading] = useState(true);
 
   const [title, setTitle] = useState(" ");
   const [content, setContent] = useState(" ");
@@ -67,31 +68,61 @@ export default function page({ params }: { params: { id: string } }) {
   };
 
   // APIでpostを取得する処理をuseEffectで実行
+  // useEffect(() => {
+  //   if (!token) return;
+
+  //   const fetcher = async () => {
+  //     const res = await fetch(`/api/admin/posts/${id}`, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token, //Headerにtokenを付与
+  //       },
+  //     });
+  //     const { post }: { post: Post } = await res.json();
+  //     setLoading(false);
+
+  //     setTitle(post.title);
+  //     setContent(post.content);
+  //     setThumbnailImageKey(post.thumbnailImageKey);
+  //     setCategories(post.postCategories.map((pc) => pc.category));
+  //   };
+
+  //   fetcher();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [id, token]);
+
+  const fetcher = async (key: string) => {
+    const res = await fetch(key, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token!, //Headerにtokenを付与
+      },
+    });
+    if (!res.ok) throw new Error("データの取得に失敗しました");
+    const data = await res.json();
+    return data.post as Post; // APIのレスポンスから post を返す
+  };
+
+  // useSWRでデータ取得
+  const {
+    data: post,
+    error,
+    isLoading,
+  } = useSWR(token && id ? `/api/admin/posts/${id}` : null, fetcher);
+
+  // データ取得後にstateを更新
   useEffect(() => {
-    if (!token) return;
-
-    const fetcher = async () => {
-      const res = await fetch(`/api/admin/posts/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token, //Headerにtokenを付与
-        },
-      });
-      const { post }: { post: Post } = await res.json();
-      setLoading(false);
-
+    if (post) {
       setTitle(post.title);
       setContent(post.content);
       setThumbnailImageKey(post.thumbnailImageKey);
       setCategories(post.postCategories.map((pc) => pc.category));
-    };
-
-    fetcher();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, token]);
+    }
+  }, [post]);
 
   if (isLoading) return <p className="text-left">読み込み中...</p>;
-  // if (!post) return <p className="text-left">記事が見つかりませんでした</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <div className="max-w-3xl mx-10">

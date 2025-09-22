@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import { CategoryForm } from "../_components/CategoryForm";
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
+import useSWR from "swr";
+import { Category } from "@/app/_types/Category";
 
 export default function page() {
   const [name, setName] = useState("");
@@ -58,23 +60,53 @@ export default function page() {
     }
   };
 
+  // useEffect(() => {
+  //   if (!token) return;
+
+  //   const fetcher = async () => {
+  //     const res = await fetch(`/api/admin/categories/${id}`, {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token, //Headerにtokenを付与
+  //       },
+  //     });
+  //     const { category } = await res.json();
+  //     setName(category.name);
+  //   };
+
+  //   fetcher();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [id, token]);
+
+  const fetcher = async (key: string) => {
+    const res = await fetch(key, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token!, //Headerにtokenを付与
+      },
+    });
+    if (!res.ok) throw new Error("データの取得に失敗しました");
+    const data = await res.json();
+    return data.category as Category; // APIのレスポンスから post を返す
+  };
+
+  // useSWRでデータ取得
+  const {
+    data: category,
+    error,
+    isLoading,
+  } = useSWR(token && id ? `/api/admin/categories/${id}` : null, fetcher);
+
+  // 追加: データ取得後にstateを更新
   useEffect(() => {
-    if (!token) return;
-
-    const fetcher = async () => {
-      const res = await fetch(`/api/admin/categories/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token, //Headerにtokenを付与
-        },
-      });
-      const { category } = await res.json();
+    if (category) {
       setName(category.name);
-    };
+    }
+  }, [category]);
 
-    fetcher();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, token]);
+  if (isLoading) return <p className="text-left">読み込み中…</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <div className="max-w-3xl mx-10">

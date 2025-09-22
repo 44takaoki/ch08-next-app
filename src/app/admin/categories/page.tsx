@@ -2,31 +2,62 @@
 
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import { Category } from "@/app/_types/Category";
-import { Post } from "@/app/_types/Post";
+
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import useSWR from "swr";
 
 export default function page() {
   const [categories, setCategories] = useState<Category[]>([]);
   const { token } = useSupabaseSession();
 
+  // useEffect(() => {
+  //   if (!token) return;
+
+  //   const fetcher = async () => {
+  //     const res = await fetch("/api/admin/categories", {
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: token, //Headerにtokenを付与
+  //       },
+  //     });
+  //     const { categories } = await res.json();
+
+  //     setCategories(categories);
+  //   };
+
+  //   fetcher();
+  // }, [token]);
+
+  const fetcher = async (key: string) => {
+    const res = await fetch(key, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token!, //Headerにtokenを付与
+      },
+    });
+    if (!res.ok) throw new Error("データの取得に失敗しました");
+    const data = await res.json();
+    return data.categories as Category[];
+  };
+
+  // useSWRでデータ取得
+  const {
+    data: categoriesData,
+    error,
+    isLoading,
+  } = useSWR(token ? `/api/admin/categories` : null, fetcher);
+
+  // データ取得後にstateを更新
   useEffect(() => {
-    if (!token) return;
+    if (categoriesData) {
+      setCategories(categoriesData);
+    }
+  }, [categoriesData]);
 
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/categories", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token, //Headerにtokenを付与
-        },
-      });
-      const { categories } = await res.json();
-
-      setCategories(categories);
-    };
-
-    fetcher();
-  }, [token]);
+  if (isLoading) return <p className="text-left">読み込み中...</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <main className="m-5 ">

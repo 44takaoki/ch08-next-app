@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Post } from "@/app/_types/Post";
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
+import useSWR from "swr";
 
 type PostDetailProps = {
   post: Post;
@@ -15,29 +16,47 @@ export default function PostDetail({ post }: PostDetailProps) {
     const yeardate = new Date(date.createdAt).toLocaleString().split(" ", 1);
     return yeardate;
   };
-  // Imageタグのsrcにセットする画像URLを持たせるstate
-  const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(
-    null
-  );
+  // // Imageタグのsrcにセットする画像URLを持たせるstate
+  // const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(
+  //   null
+  // );
 
   if (!post) return <p className="text-left">投稿が見つかりませんでした</p>;
 
-  useEffect(() => {
-    if (!post?.thumbnailImageKey) return;
+  // useEffect(() => {
+  //   if (!post?.thumbnailImageKey) return;
 
-    // アップロード時に取得した thumbnailImageKeyを用いて画像のURLを取得
-    const fetcher = async () => {
-      const {
-        data: { publicUrl },
-      } = await supabase.storage
-        .from("post_thumbnail")
-        .getPublicUrl(post.thumbnailImageKey);
+  //   // アップロード時に取得した thumbnailImageKeyを用いて画像のURLを取得
+  //   const fetcher = async () => {
+  //     const {
+  //       data: { publicUrl },
+  //     } = await supabase.storage
+  //       .from("post_thumbnail")
+  //       .getPublicUrl(post.thumbnailImageKey);
 
-      setThumbnailImageUrl(publicUrl);
-    };
+  //     setThumbnailImageUrl(publicUrl);
+  //   };
 
-    fetcher();
-  }, [post.thumbnailImageKey]);
+  //   fetcher();
+  // }, [post.thumbnailImageKey]);
+
+  // useSWRに置き換え
+  const fetcher = async (key: string) => {
+    if (!key) return null;
+    const {
+      data: { publicUrl },
+    } = await supabase.storage
+      .from("post_thumbnail")
+      .getPublicUrl(post.thumbnailImageKey);
+
+    return publicUrl;
+  };
+
+  const {
+    data: thumbnailImageUrl,
+    error,
+    isLoading,
+  } = useSWR(post.thumbnailImageKey, fetcher);
 
   return (
     <div>

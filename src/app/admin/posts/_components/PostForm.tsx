@@ -4,6 +4,7 @@ import { CategoriesSelect } from "./CategoriesSelect";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "@/utils/supabase";
 import Image from "next/image";
+import useSWR from "swr";
 
 interface Props {
   mode: "new" | "edit";
@@ -34,9 +35,9 @@ export const PostForm = ({
   onDelete,
   isSubmit,
 }: Props) => {
-  const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(
-    null
-  );
+  // const [thumbnailImageUrl, setThumbnailImageUrl] = useState<null | string>(
+  //   null
+  // );
 
   const handleImageChange = async (
     event: ChangeEvent<HTMLInputElement>
@@ -68,22 +69,38 @@ export const PostForm = ({
     setThumbnailImageKey(data.path);
   };
 
-  // DBに保存しているthumnailImageKeyを元に、Supabaseから画像のURLを取得する
-  useEffect(() => {
-    if (!thumbnailImageKey || thumbnailImageKey.trim() === "") return;
+  // // DBに保存しているthumnailImageKeyを元に、Supabaseから画像のURLを取得する
+  // useEffect(() => {
+  //   if (!thumbnailImageKey || thumbnailImageKey.trim() === "") return;
 
-    const fetcher = async () => {
-      const {
-        data: { publicUrl },
-      } = await supabase.storage
-        .from("post_thumbnail")
-        .getPublicUrl(thumbnailImageKey);
+  //   const fetcher = async () => {
+  //     const {
+  //       data: { publicUrl },
+  //     } = await supabase.storage
+  //       .from("post_thumbnail")
+  //       .getPublicUrl(thumbnailImageKey);
 
-      setThumbnailImageUrl(publicUrl);
-    };
+  //     setThumbnailImageUrl(publicUrl);
+  //   };
 
-    fetcher();
-  }, [thumbnailImageKey]);
+  //   fetcher();
+  // }, [thumbnailImageKey]);
+
+  // useSWRに置き換え
+  const fetcher = async (key: string) => {
+    if (!key || key.trim() === "") return null;
+    const {
+      data: { publicUrl },
+    } = await supabase.storage.from("post_thumbnail").getPublicUrl(key);
+
+    return publicUrl;
+  };
+
+  const {
+    data: thumbnailImageUrl,
+    error,
+    isLoading,
+  } = useSWR(thumbnailImageKey, fetcher);
 
   return (
     <form className="mt-4 w-full ">
@@ -137,6 +154,7 @@ export const PostForm = ({
               alt="thumbnail"
               width={400}
               height={400}
+              style={{ width: "auto", height: "auto" }} // ← 追加: auto でアスペクト比維持
             />
           </div>
         )}
