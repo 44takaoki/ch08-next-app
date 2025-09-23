@@ -7,6 +7,7 @@ import { CategoryForm } from "../_components/CategoryForm";
 import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import useSWR from "swr";
 import { Category } from "@/app/_types/Category";
+import { useFetch } from "../../_hooks/useFetch";
 
 export default function page() {
   const [name, setName] = useState("");
@@ -60,49 +61,36 @@ export default function page() {
     }
   };
 
-  // useEffect(() => {
-  //   if (!token) return;
+  // const fetcher = async (key: string) => {
+  //   const res = await fetch(key, {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token!, //Headerにtokenを付与
+  //     },
+  //   });
+  //   if (!res.ok) throw new Error("データの取得に失敗しました");
+  //   const data = await res.json();
+  //   return data.category as Category; // APIのレスポンスから category を返す
+  // };
 
-  //   const fetcher = async () => {
-  //     const res = await fetch(`/api/admin/categories/${id}`, {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: token, //Headerにtokenを付与
-  //       },
-  //     });
-  //     const { category } = await res.json();
-  //     setName(category.name);
-  //   };
+  // // useSWRでデータ取得
+  // const {
+  //   data: category,
+  //   error,
+  //   isLoading,
+  // } = useSWR(token && id ? `/api/admin/categories/${id}` : null, fetcher);
 
-  //   fetcher();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [id, token]);
-
-  const fetcher = async (key: string) => {
-    const res = await fetch(key, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token!, //Headerにtokenを付与
-      },
-    });
-    if (!res.ok) throw new Error("データの取得に失敗しました");
-    const data = await res.json();
-    return data.category as Category; // APIのレスポンスから post を返す
-  };
-
-  // useSWRでデータ取得
-  const {
-    data: category,
-    error,
-    isLoading,
-  } = useSWR(token && id ? `/api/admin/categories/${id}` : null, fetcher);
+  // カスタムフック useFetchに置き換え
+  const { data, error, isLoading } = useFetch<{ category: Category }>(
+    `/api/admin/categories/${id}`
+  );
 
   // 追加: データ取得後にstateを更新
   useEffect(() => {
-    if (category) {
-      setName(category.name);
+    if (data) {
+      setName(data.category.name);
     }
-  }, [category]);
+  }, [data]);
 
   if (isLoading) return <p className="text-left">読み込み中…</p>;
   if (error)
