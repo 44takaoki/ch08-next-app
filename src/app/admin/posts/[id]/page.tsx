@@ -6,20 +6,24 @@ import { useParams, useRouter } from "next/navigation";
 
 import React, { useEffect, useState } from "react";
 import { PostForm } from "../_components/PostForm";
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
+import useSWR from "swr";
+import { useFetch } from "../../_hooks/useFetch";
 
 export default function page({ params }: { params: { id: string } }) {
   // ルートパラメータを取得
   // const { id } = useParams();
 
-  const [isLoading, setLoading] = useState(true);
+  // const [isLoading, setLoading] = useState(true);
 
   const [title, setTitle] = useState(" ");
   const [content, setContent] = useState(" ");
-  const [thumbnailUrl, setThumbnailUrl] = useState(" ");
+  const [thumbnailImageKey, setThumbnailImageKey] = useState(" ");
   const [categories, setCategories] = useState<Category[]>([]);
   const { id } = useParams();
   const router = useRouter();
   const [isSubmit, setSubmit] = useState(false);
+  const { token } = useSupabaseSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     // フォームのデフォルトの動作をキャンセル
@@ -31,9 +35,10 @@ export default function page({ params }: { params: { id: string } }) {
       await fetch(`/api/admin/posts/${id}`, {
         method: "PUT",
         headers: {
-          "Content-type": "applicaiton/json",
+          "Content-Type": "application/json",
+          Authorization: token!, //Headerにtokenを付与
         },
-        body: JSON.stringify({ title, content, thumbnailUrl, categories }),
+        body: JSON.stringify({ title, content, thumbnailImageKey, categories }),
       });
 
       alert("記事を更新しました。");
@@ -63,25 +68,43 @@ export default function page({ params }: { params: { id: string } }) {
     }
   };
 
-  // APIでpostを取得する処理をuseEffectで実行
+  // const fetcher = async (key: string) => {
+  //   const res = await fetch(key, {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token!, //Headerにtokenを付与
+  //     },
+  //   });
+  //   if (!res.ok) throw new Error("データの取得に失敗しました");
+  //   const data = await res.json();
+  //   return data.post as Post; // APIのレスポンスから post を返す
+  // };
+
+  // // useSWRでデータ取得
+  // const {
+  //   data: post,
+  //   error,
+  //   isLoading,
+  // } = useSWR(token && id ? `/api/admin/posts/${id}` : null, fetcher);
+
+  // カスタムフック useFetchに置き換え
+  const { data, error, isLoading } = useFetch<{ post: Post }>(
+    `/api/admin/posts/${id}`
+  );
+
+  // データ取得後にstateを更新
   useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch(`/api/admin/posts/${id}`);
-      const { post }: { post: Post } = await res.json();
-      setLoading(false);
-
-      setTitle(post.title);
-      setContent(post.content);
-      setThumbnailUrl(post.thumbnailUrl);
-      setCategories(post.postCategories.map((pc) => pc.category));
-    };
-
-    fetcher();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    if (data) {
+      setTitle(data.post.title);
+      setContent(data.post.content);
+      setThumbnailImageKey(data.post.thumbnailImageKey);
+      setCategories(data.post.postCategories.map((pc) => pc.category));
+    }
+  }, [data]);
 
   if (isLoading) return <p className="text-left">読み込み中...</p>;
-  // if (!post) return <p className="text-left">記事が見つかりませんでした</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <div className="max-w-3xl mx-10">
@@ -94,8 +117,8 @@ export default function page({ params }: { params: { id: string } }) {
         setTitle={setTitle}
         content={content}
         setContent={setContent}
-        thumbnailUrl={thumbnailUrl}
-        setThumbnailUrl={setThumbnailUrl}
+        thumbnailImageKey={thumbnailImageKey}
+        setThumbnailImageKey={setThumbnailImageKey}
         categories={categories}
         setCategories={setCategories}
         onSubmit={handleSubmit}

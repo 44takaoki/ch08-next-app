@@ -2,13 +2,23 @@
 
 import Link from "next/link";
 import React from "react";
+import { useRouteGuard } from "./_hooks/useRouteGuard";
+import { usePathname } from "next/navigation";
 
-export default function RootLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  useRouteGuard();
+
+  const pathname = usePathname();
+  const isSelected = (href: string) => {
+    return pathname.includes(href);
+  };
+
   return (
+    // サイドバー
     <div className="">
       <aside className="fixed bg-slate-200 w-48 h-screen top-16">
         <ul className="text-base text-gray-900 ">

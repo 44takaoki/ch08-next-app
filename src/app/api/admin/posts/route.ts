@@ -1,10 +1,21 @@
 import { CreatePostRequestBody } from "@/app/_types/Post";
+import { supabase } from "@/utils/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
 export const GET = async (request: NextRequest) => {
+  const token = request.headers.get("Authorization") ?? "";
+
+  //supabaseに対してtokenを送る
+  const { error } = await supabase.auth.getUser(token);
+
+  // 送ったtokenが正しくない場合、errorが返却されるので、クライアントにもエラーを返す
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 });
+
+  // tokenが正しい場合、以降が実行される
   try {
     const posts = await prisma.post.findMany({
       include: {
@@ -38,16 +49,20 @@ export const POST = async (request: NextRequest, context: any) => {
     // リクエストのbodyを取得
     const body = await request.json();
 
-    // bodyの中からtitle, content, categories, thumbnailUrlを取り出す
-    const { title, content, categories, thumbnailUrl }: CreatePostRequestBody =
-      body;
+    // bodyの中からtitle, content, categories, thumbnailImageKeyを取り出す
+    const {
+      title,
+      content,
+      categories,
+      thumbnailImageKey,
+    }: CreatePostRequestBody = body;
 
     // 投稿をDBに生成
     const data = await prisma.post.create({
       data: {
         title,
         content,
-        thumbnailUrl,
+        thumbnailImageKey,
       },
     });
 

@@ -6,7 +6,7 @@ export interface Post {
   content: string;
   createdAt: string;
   postCategories: { category: Category }[];
-  thumbnailUrl: string;
+  thumbnailImageKey: string;
 }
 
 // 記事の更新に送られてくるリクエストのbodyの型
@@ -14,7 +14,7 @@ export interface UpdatePostRequestBody {
   title: string;
   content: string;
   categories: { id: number }[];
-  thumbnailUrl: string;
+  thumbnailImageKey: string;
 }
 
 // 記事作成のリクエストボディの型
@@ -22,5 +22,5 @@ export interface CreatePostRequestBody {
   title: string;
   content: string;
   categories: { id: number }[];
-  thumbnailUrl: string;
+  thumbnailImageKey: string;
 }

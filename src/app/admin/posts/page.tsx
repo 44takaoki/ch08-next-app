@@ -1,28 +1,57 @@
 "use client";
 
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import { Post } from "@/app/_types/Post";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
+import { useFetch } from "../_hooks/useFetch";
 
 export default function page() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const { token } = useSupabaseSession();
 
-  useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/posts");
-      const { posts } = await res.json();
+  // const fetcher = async (key: string) => {
+  //   // console.log("トークン", token);
+  //   const res = await fetch(key, {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token!, //Headerにtokenを付与
+  //     },
+  //   });
+  //   if (!res.ok) throw new Error("データの取得に失敗しました");
+  //   const data = await res.json();
+  //   return data.posts as Post[];
+  // };
 
-      setPosts(posts);
-    };
+  // // useSWRでデータ取得
+  // const {
+  //   data: postsData,
+  //   error,
+  //   isLoading,
+  // } = useSWR(token ? `/api/admin/posts` : null, fetcher);
 
-    fetcher();
-  }, []);
+  // カスタムフック useFetchに置き換え
+  const { data, error, isLoading } = useFetch<{ posts: Post[] }>(
+    `/api/admin/posts`
+  );
 
   const formatDate = (date: Post) => {
     // 日時をyyyy/MM/DD形式にフォーマット
     const yeardate = new Date(date.createdAt).toLocaleString().split(" ", 1);
     return yeardate;
   };
+
+  // データ取得後にstateを更新
+  useEffect(() => {
+    if (data) {
+      setPosts(data.posts || []);
+    }
+  }, [data]);
+
+  if (isLoading) return <p className="text-left">読み込み中...</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <main className="m-5 ">

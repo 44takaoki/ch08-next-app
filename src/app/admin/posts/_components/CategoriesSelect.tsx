@@ -1,3 +1,4 @@
+import { useSupabaseSession } from "@/app/_hooks/useSupabaseSession";
 import { Category } from "@/app/_types/Category";
 import {
   Listbox,
@@ -7,6 +8,8 @@ import {
 } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import React, { useEffect, useState } from "react";
+import useSWR from "swr";
+import { useFetch } from "../../_hooks/useFetch";
 
 interface Props {
   selectedCategories: Category[];
@@ -18,35 +21,42 @@ export const CategoriesSelect = ({
   setSelectedCategories,
 }: Props) => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const { token } = useSupabaseSession();
 
-  // const handleChange = (value: number[]) => {
-  //   value.forEach((v: number) => {
-  //     const isSelect = selectedCategories.some((c) => c.id === v);
-  //     if (isSelect) {
-  //       setSelectedCategories(selectedCategories.filter((c) => c.id !== v));
-  //       return;
-  //     }
-
-  //     const category = categories.find((c) => c.id === v);
-
-  //     if (!category) return;
-  //     setSelectedCategories([...selectedCategories, category]);
+  // const fetcher = async (key: string) => {
+  //   const res = await fetch(key, {
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: token!, //Headerにtokenを付与
+  //     },
   //   });
+  //   if (!res.ok) throw new Error("データの取得に失敗しました");
+  //   const data = await res.json();
+  //   return data.categories as Category[];
   // };
 
-  // const removeCategory = (id: number) => {
-  //   setSelectedCategories(selectedCategories.filter((c) => c.id !== id));
-  // };
+  // // useSWRでデータ取得
+  // const {
+  //   data: categoriesData,
+  //   error,
+  //   isLoading,
+  // } = useSWR(token ? `/api/admin/categories` : null, fetcher);
 
+  // カスタムフック useFetchに置き換え
+  const { data, error, isLoading } = useFetch<{ categories: Category[] }>(
+    `/api/admin/categories`
+  );
+
+  // データ取得後にstateを更新
   useEffect(() => {
-    const fetcher = async () => {
-      const res = await fetch("/api/admin/categories");
-      const { categories } = await res.json();
-      setCategories(categories);
-    };
+    if (data) {
+      setCategories(data.categories || []);
+    }
+  }, [data]);
 
-    fetcher();
-  }, []);
+  if (isLoading) return <p className="text-left">読み込み中...</p>;
+  if (error)
+    return <p className="text-left">エラーが発生しました: {error.message}</p>;
 
   return (
     <div>

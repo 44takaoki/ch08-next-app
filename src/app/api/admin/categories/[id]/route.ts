@@ -1,4 +1,5 @@
 import { UpdateCategoryRequestBody } from "@/app/_types/Category";
+import { supabase } from "@/utils/supabase";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,6 +11,13 @@ export const GET = async (
 ) => {
   // paramsの中にidが入っているので、取り出す
   const { id } = params;
+  const token = request.headers.get("Authorization") ?? "";
+  //supabaseに対してtokenを送る
+  const { error } = await supabase.auth.getUser(token);
+  // 送ったtokenが正しくない場合、errorが返却されるので、クライアントにもエラーを返す
+  if (error)
+    return NextResponse.json({ status: error.message }, { status: 400 });
+  // tokenが正しい場合、以降が実行される
 
   try {
     const category = await prisma.category.findUnique({
